@@ -12,5 +12,7 @@ std::string toString(E value) {
     return out;
 }
 
+void callLater(std::function<void()> f);
+
 } // namespace util
 } // namespace uvw_net

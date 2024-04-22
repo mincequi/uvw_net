@@ -9,7 +9,7 @@ namespace http {
 HttpRequest::HttpRequest() {
 }
 
-std::pair<std::unique_ptr<char[]>, size_t> HttpRequest::serialize() {
+std::pair<std::unique_ptr<char[]>, size_t> HttpRequest::toBuffer() {
     // Write the request to the socket
     std::stringstream ss;
     ss << method;
@@ -23,13 +23,8 @@ std::pair<std::unique_ptr<char[]>, size_t> HttpRequest::serialize() {
         ss << "Content-Length: " << body.size() << "\r\n";
     }
 
-    // FIXME: only write those default headers if no user supplied are presents
     ss << "Host: " << host << "\r\n";
-    ss << "Accept: */*"
-       << "\r\n";
-    ss << "Accept-Encoding: gzip"
-       << "\r\n";
-    ss << "User-Agent: uvweb-client"
+    ss << "User-Agent: uvw-net"
        << "\r\n";
 
     for (auto&& it : headers) {

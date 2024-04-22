@@ -4,6 +4,7 @@
 #include <uvw_net/dns_sd/DnsRecordType.h>
 
 namespace uvw_net {
+namespace dns_sd {
 
 // +--+--+--+
 // / QNAME  /
@@ -21,4 +22,5 @@ struct DnsQuestion {
     const static uint16_t minSize = 6;
 };
 
+} // namespace dns_sd
 } // namespace uvw_net

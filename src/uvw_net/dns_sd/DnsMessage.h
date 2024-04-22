@@ -14,8 +14,8 @@ struct DnsMessage {
 	DnsHeader header = { 0 };
 	std::vector<DnsQuestion> questions;
 	std::vector<DnsAnswer> answers;
-	std::vector<DnsAnswer> authorityAnwsers;
-	std::vector<DnsAnswer> additionalAnwsers;
+	std::vector<DnsAnswer> authorityAnswers;
+	std::vector<DnsAnswer> additionalAnswers;
 
     static std::optional<DnsMessage> fromBuffer(const uint8_t* buf, size_t bufSize);
     std::vector<uint8_t> toBuffer() const;

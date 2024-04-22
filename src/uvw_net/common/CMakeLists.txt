@@ -8,3 +8,8 @@ PUBLIC
   uvw::uvw-static
   magic_enum::magic_enum
 )
+
+target_include_directories(common
+PUBLIC
+  ../../
+)

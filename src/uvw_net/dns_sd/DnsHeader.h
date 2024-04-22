@@ -1,6 +1,7 @@
 #pragma once
 
 namespace uvw_net {
+namespace dns_sd {
 
 enum class DnsOpCode : uint16_t {
 };
@@ -26,4 +27,5 @@ struct DnsHeader {
 };
 #pragma pack()
 
+} // namespace dns_sd
 } // namespace uvw_net

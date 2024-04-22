@@ -18,7 +18,7 @@ DnsServiceDiscovery::DnsServiceDiscovery() {
             return;
         }
         for (const auto& a : msg->answers) {
-            if (a.type != uvw_net::DnsRecordType::SRV ||
+            if (a.type != DnsRecordType::SRV ||
                     !a.name.ends_with(_name + ".") ||
                     !std::holds_alternative<DnsRecordDataSrv>(a.data)) continue;
 
@@ -34,9 +34,9 @@ DnsServiceDiscovery::DnsServiceDiscovery() {
 void DnsServiceDiscovery::discover(const std::string& name) {
     _name = name;
     // https://mislove.org/teaching/cs4700/spring11/handouts/project1-primer.pdf
-    uvw_net::DnsQuestion question;
+    DnsQuestion question;
     question.name = _name; // "_http._tcp.local";
-    question.type = uvw_net::DnsRecordType::SRV;
+    question.type = DnsRecordType::SRV;
     DnsMessage message;
     message.questions.push_back(question);
     const auto buffer = message.toBuffer();

@@ -278,7 +278,7 @@ std::optional<DnsMessage> DnsMessage::fromBuffer(const uint8_t* buf, size_t bufS
                 return {};
             }
             offset += rsize;
-            message.authorityAnwsers.emplace_back(std::move(record));
+            message.authorityAnswers.emplace_back(std::move(record));
         }
         for (auto i = 0; i < additonalCount; ++i) {
             auto [rsize, record] = parser.parseAnswer(offset);
@@ -286,12 +286,12 @@ std::optional<DnsMessage> DnsMessage::fromBuffer(const uint8_t* buf, size_t bufS
                 return {};
             }
             offset += rsize;
-            message.additionalAnwsers.emplace_back(std::move(record));
+            message.additionalAnswers.emplace_back(std::move(record));
         }
     }
 
     return message;
-};
+}
 
 std::vector<uint8_t> DnsMessage::toBuffer() const {
     std::vector<uint8_t> buffer;
@@ -299,8 +299,8 @@ std::vector<uint8_t> DnsMessage::toBuffer() const {
     std::memcpy(buffer.data(), &header, sizeof(DnsHeader));
     const auto questionCount = htons(questions.size());
     const auto anwserCount = htons(answers.size());
-    const auto authoriyCount = htons(authorityAnwsers.size());
-    const auto additonalCount = htons(additionalAnwsers.size());
+    const auto authoriyCount = htons(authorityAnswers.size());
+    const auto additonalCount = htons(additionalAnswers.size());
     std::memcpy(buffer.data() + 4, &questionCount, 2);
     std::memcpy(buffer.data() + 6, &anwserCount, 2);
     std::memcpy(buffer.data() + 8, &authoriyCount, 2);

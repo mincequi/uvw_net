@@ -1,20 +1,8 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.14)
 
 project(uvw_net LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
-
-add_subdirectory(src/uvw_net/common)
-add_subdirectory(src/uvw_net/dns_sd)
-add_subdirectory(src/uvw_net/http)
-add_subdirectory(src/uvw_net/modbus)
-add_subdirectory(src/uvw_net/sunspec)
-add_subdirectory(tools)
-
-option(BUILD_TESTS "Build test programs" OFF)
-if(BUILD_TESTS)
-  add_subdirectory(tests)
-endif()
 
 # add dependencies
 include(cmake/CPM.cmake)
@@ -28,3 +16,21 @@ CPMAddPackage(
   NAME llhttp
   URL https://github.com/nodejs/llhttp/archive/refs/tags/release/v9.2.0.tar.gz
 )
+
+add_subdirectory(src/uvw_net/common)
+add_subdirectory(src/uvw_net/dns_sd)
+add_subdirectory(src/uvw_net/http)
+add_subdirectory(src/uvw_net/modbus)
+add_subdirectory(src/uvw_net/sunspec)
+
+# Tests
+option(BUILD_TESTING "Build test programs" OFF)
+if(BUILD_TESTING)
+  add_subdirectory(tests)
+endif()
+
+# Tools
+option(BUILD_TOOLS "Build tool programs" OFF)
+if(BUILD_TOOLS)
+  add_subdirectory(tools)
+endif()

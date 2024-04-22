@@ -3,6 +3,7 @@
 #include <cstdint>
 
 namespace uvw_net {
+namespace dns_sd {
 
 enum DnsRecordClass : uint16_t {
     Invalid = 0,
@@ -12,4 +13,5 @@ enum DnsRecordClass : uint16_t {
 	Hesiod = 4,
 };
 
+} // namespace dns_sd
 } // namespace uvw_net

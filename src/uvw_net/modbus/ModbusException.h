@@ -21,8 +21,8 @@ enum class ModbusExceptionCode : uint8_t {
 };
 
 struct ModbusException {
-    uint8_t uintId;
-    ModbusExceptionCode functionCode;
+    uint8_t unitId;
+    ModbusExceptionCode exceptionCode;
 };
 
 } // namespace modbus

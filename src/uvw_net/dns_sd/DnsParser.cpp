@@ -4,8 +4,9 @@
 #include <arpa/inet.h>
 
 namespace uvw_net {
+namespace dns_sd {
 
-std::tuple<size_t, std::string> DnsParser::parseName(const uint8_t *head, const uint8_t *ptr, const uint8_t *tail) {
+std::tuple<size_t, std::string> DnsParser::parseName(const uint8_t* head, const uint8_t* ptr, const uint8_t* tail) {
     // is ROOT name?
     if (*ptr == 0) {
         return { 1, {} };
@@ -21,7 +22,7 @@ std::tuple<size_t, std::string> DnsParser::parseName(const uint8_t *head, const 
     // concatenate each part
     std::string result;
     for (auto p : labels) {
-        result += std::string((char *)p + 1, *p);
+        result += std::string((char*)p + 1, *p);
         result += ".";
     }
 
@@ -29,7 +30,7 @@ std::tuple<size_t, std::string> DnsParser::parseName(const uint8_t *head, const 
     return { dataLen, std::move(result) };
 }
 
-int DnsParser::parseLabels(const uint8_t *head, const uint8_t *ptr, const uint8_t *tail, std::vector<const uint8_t *> &parts, bool recursively) {
+int DnsParser::parseLabels(const uint8_t* head, const uint8_t* ptr, const uint8_t* tail, std::vector<const uint8_t*>& parts, bool recursively) {
     assert(head != nullptr && ptr != nullptr && tail != nullptr);
     assert(head < tail);
     if (ptr < head) {
@@ -86,4 +87,5 @@ int DnsParser::parseLabels(const uint8_t *head, const uint8_t *ptr, const uint8_
     return consumed;
 }
 
+} // namespace dns_sd
 } // namespace uvw_net

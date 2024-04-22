@@ -27,6 +27,14 @@ ModbusClient::ModbusClient() {
     _tcpClient->on<uvw::connect_event>([this](const uvw::connect_event& ev, uvw::tcp_handle& tcpClient) {
         publish(ev);
     });
+    _tcpClient->on<uvw::error_event>([this](const uvw::error_event& ev, uvw::tcp_handle& tcpClient) {
+        publish(ev);
+    });
+    _tcpClient->on<uvw::shutdown_event>([this](const uvw::shutdown_event&, uvw::tcp_handle& tcpClient) {
+        // TODO: why do we actually emit timeout event here?
+        publish(uvw::error_event{(int)UV_ETIMEDOUT});
+    });
+
     _tcpClient->on<uvw::data_event>([this](const uvw::data_event& event, uvw::tcp_handle& tcpClient) {
         // data_events can be emitted several times without carrying the whole
         // modbus message. So, we collect everything in a readBuffer.
@@ -53,20 +61,10 @@ ModbusClient::ModbusClient() {
         _readBuffer.clear();
     });
     // EOS handler
-    _tcpClient->on<uvw::end_event>([this](const uvw::end_event& ev, uvw::tcp_handle& tcpClient) {
-        //std::cout << _ip << "> end_event" << std::endl;
-        //publish(uvw::error_event{(int)UV_ETIMEDOUT});
+    _tcpClient->on<uvw::end_event>([this](const uvw::end_event&, uvw::tcp_handle&) {
+        // Note: occassionally, we receive an EOF. Then we want to reconnect.
         _tcpClient->init();
-        _tcpClient->connect(_ip, 502);
-    });
-    _tcpClient->on<uvw::shutdown_event>([this](const uvw::shutdown_event& ev, uvw::tcp_handle& tcpClient) {
-        //std::cout << _ip << "> shutdown_event" << std::endl;
-        publish(uvw::error_event{(int)UV_ETIMEDOUT});
-    });
-    // Set error handler
-    _tcpClient->on<uvw::error_event>([this](const uvw::error_event& ev, uvw::tcp_handle& tcpClient) {
-        //std::cout << _ip << "> error_event" << std::endl;
-        publish(ev);
+        _tcpClient->connect(_ip, _port);
     });
     // Start reading after writing
     _tcpClient->on<uvw::write_event>([this](const uvw::write_event&, uvw::tcp_handle& tcpClient) {
@@ -86,9 +84,14 @@ const std::string& ModbusClient::ip() const {
     return _ip;
 }
 
+uint16_t ModbusClient::port() const {
+    return _port;
+}
+
 void ModbusClient::connect(const std::string& ip, uint16_t port) {
     _ip = ip;
-    _tcpClient->connect(_ip, port);
+    _port = port;
+    _tcpClient->connect(_ip, _port);
 }
 
 void ModbusClient::readHoldingRegisters(uint8_t unitId, uint16_t address, uint16_t length, uint16_t userData) {

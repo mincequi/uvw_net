@@ -1,6 +1,7 @@
 #pragma once
 
 namespace uvw_net {
+namespace dns_sd {
 
 enum class DnsRecordType : uint16_t {
     Invalid = 0,
@@ -54,4 +55,5 @@ enum class DnsRecordType : uint16_t {
     DLV = 32769,
 };
 
+} // namespace dns_sd
 } // namespace uvw_net

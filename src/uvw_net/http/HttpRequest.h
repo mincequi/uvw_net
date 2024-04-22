@@ -22,9 +22,7 @@ public:
     bool messageComplete = false;
 
 private:
-    std::pair<std::unique_ptr<char[]>, size_t> serialize();
-
-    std::string _buffer;
+    std::pair<std::unique_ptr<char[]>, size_t> toBuffer();
 
     friend class HttpSession;
 };
