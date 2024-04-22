@@ -12,6 +12,8 @@ add_executable(uvw_net_tests
   modbus/ModbusDiscoveryTest.cpp
   modbus/ModbusRequestTest.cpp
   modbus/ModbusResponseTest.cpp
+  sunspec/SunSpecDiscoveryTest.cpp
+  sunspec/SunSpecClientTest.cpp
 )
 
 target_link_libraries(uvw_net_tests
@@ -20,6 +22,7 @@ PRIVATE
   uvw_net::dns_sd
   uvw_net::http
   uvw_net::modbus
+  uvw_net::sunspec
   Catch2::Catch2WithMain
 )
 

@@ -18,7 +18,6 @@ enum InverterOperatingStatus : uint16_t {
     error           = 7,
     service         = 8
 };
-std::ostream& operator<<(std::ostream& os, sunspec::InverterOperatingStatus state);
 
 enum InverterEvent : uint16_t {
     groundingError      = 0,

@@ -6,7 +6,6 @@
 
 #include <uvw_net/common/Util.h>
 #include <uvw_net/sunspec/SunSpecMeasuredValue.h>
-#include <uvw_net/sunspec/SunSpecStatsModel.h>
 
 using namespace magic_enum::ostream_operators;
 
@@ -27,18 +26,6 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const sunspec::StatsModel& model) {
-    os << "{";
-    for (auto it = model.values().cbegin(); it != model.values().cend(); ++it) {
-        os << "\"" << util::toString(it->first) << "\":" << it->second;
-        if (std::distance(it, model.values().cend()) > 1) {
-            os << ",";
-        }
-    }
-    os << "}";
-    return os;
-}
-
 std::ostream& operator<<(std::ostream& os, const sunspec::SunSpecModel& model) {
     os << "{";
     for (auto it = model.values().cbegin(); it != model.values().cend(); ++it) {
@@ -49,10 +36,6 @@ std::ostream& operator<<(std::ostream& os, const sunspec::SunSpecModel& model) {
     }
     os << "}";
     return os;
-}
-
-std::ostream& operator<<(std::ostream& os, const sunspec::StatsValue& value) {
-    return os << value.m_variant;
 }
 
 template <class T>

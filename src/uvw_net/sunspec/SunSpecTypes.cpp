@@ -7,10 +7,6 @@
 namespace uvw_net {
 namespace sunspec {
 
-std::ostream& operator<<(std::ostream& os, sunspec::InverterOperatingStatus state) {
-    return os << "\"" << magic_enum::enum_name(state) << "\"";
-}
-
 std::ostream& operator<<(std::ostream& os, const InverterEvents& value) {
     os << "[";
     bool elementAdded = false;

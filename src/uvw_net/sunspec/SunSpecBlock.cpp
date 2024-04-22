@@ -1,7 +1,7 @@
 #include "SunSpecBlock.h"
 
-#include "SunSpecStatsValue.h"
 #include "SunSpecMeasuredValue.h"
+#include "SunSpecTypes.h"
 
 namespace uvw_net {
 namespace sunspec {

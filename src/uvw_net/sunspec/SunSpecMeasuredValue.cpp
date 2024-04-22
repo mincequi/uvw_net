@@ -1,6 +1,6 @@
 #include "SunSpecMeasuredValue.h"
 
-#include "SunSpecStatsValue.h"
+#include "SunSpecTypes.h"
 
 namespace uvw_net {
 namespace sunspec {

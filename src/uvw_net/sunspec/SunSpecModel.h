@@ -5,7 +5,7 @@
 #include <magic_enum.hpp>
 
 #include "SunSpecDataPoint.h"
-#include "SunSpecStatsValue.h"
+#include "SunSpecLiveValue.h"
 #include "models/SunSpecCommonModelFactory.h"
 
 namespace uvw_net {

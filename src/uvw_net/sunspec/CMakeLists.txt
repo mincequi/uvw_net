@@ -1,4 +1,4 @@
-add_library(sunspec STATIC
+add_library(uvw_net_sunspec STATIC
   SunSpecBlock.cpp
   SunSpecClient.cpp
   SunSpecDataPoint.cpp
@@ -7,8 +7,6 @@ add_library(sunspec STATIC
   SunSpecMeasuredValue.cpp
   SunSpecModel.cpp
   SunSpecModelFactory.cpp
-  SunSpecStatsModel.cpp
-  SunSpecStatsValue.cpp
   SunSpecTypes.cpp
   models/SunSpecCommonModelFactory.cpp
   models/SunSpecElgrisSmartMeterModelFactory.cpp
@@ -16,14 +14,14 @@ add_library(sunspec STATIC
   models/SunSpecMpptInverterExtensionModelFactory.cpp
   models/SunSpecWyeConnectMeterModelFactory.cpp
 )
-add_library(uvw_net::sunspec ALIAS sunspec)
+add_library(uvw_net::sunspec ALIAS uvw_net_sunspec)
 
-target_link_libraries(sunspec
+target_link_libraries(uvw_net_sunspec
 PUBLIC
-  modbus
+  uvw_net::modbus
 )
 
-target_include_directories(sunspec
+target_include_directories(uvw_net_sunspec
 PUBLIC
   ../../
 )

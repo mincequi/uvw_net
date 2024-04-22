@@ -24,7 +24,8 @@ SunSpecClient::SunSpecClient(modbus::ModbusClientPtr modbusClient)
         publish(ev);
     });
     _modbusClient->on<uvw::connect_event>([this](const auto& ev, const auto&) {
-        publish(ev);
+        // Note: connect_event shall only be published, when the header is read successfully.
+        //publish(ev);
     });
     _modbusClient->on<uvw::error_event>([this](const auto& ev, const auto&) {
         publish(ev);

@@ -1,17 +1,17 @@
-add_library(dns_sd STATIC
+add_library(uvw_net_dns_sd STATIC
   DnsMessage.cpp
   DnsParser.cpp
   DnsRecordDataSrv.cpp
   DnsServiceDiscovery.cpp
 )
-add_library(uvw_net::dns_sd ALIAS dns_sd)
+add_library(uvw_net::dns_sd ALIAS uvw_net_dns_sd)
 
-target_link_libraries(dns_sd
+target_link_libraries(uvw_net_dns_sd
 PUBLIC
-  common
+  uvw_net::common
 )
 
-target_include_directories(dns_sd
+target_include_directories(uvw_net_dns_sd
 PUBLIC
   ../../
 )
