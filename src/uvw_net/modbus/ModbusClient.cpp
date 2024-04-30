@@ -6,6 +6,7 @@
 
 #include <uvw/loop.h>
 #include <uvw/tcp.h>
+#include <uvw/timer.h>
 
 #include "ModbusException.h"
 
@@ -19,8 +20,6 @@ std::shared_ptr<ModbusClient> ModbusClient::create() {
 }
 
 ModbusClient::ModbusClient() {
-    //_tcpClient->keep_alive(true, uvw::tcp_handle::time{10});
-    //close_event, connect_event, data_event, end_event, error_event, listen_event, shutdown_event, write_event
     _tcpClient->on<uvw::close_event>([this](const uvw::close_event& ev, uvw::tcp_handle& tcpClient) {
         publish(ev);
     });
@@ -59,17 +58,23 @@ ModbusClient::ModbusClient() {
 
         _transactionsUserData.erase(response->transactionId);
         _readBuffer.clear();
-    });
-    // EOS handler
-    _tcpClient->on<uvw::end_event>([this](const uvw::end_event&, uvw::tcp_handle&) {
-        // Note: occassionally, we receive an EOF. Then we want to reconnect.
-        _tcpClient->init();
-        _tcpClient->connect(_ip, _port);
+
+        //if (_timer) {
+        //    _timer->stop();
+        //    _timer->close();
+        //}
     });
     // Start reading after writing
     _tcpClient->on<uvw::write_event>([this](const uvw::write_event&, uvw::tcp_handle& tcpClient) {
         _readBuffer.clear();
         tcpClient.read();
+    });
+    // EOS handler
+    _tcpClient->on<uvw::end_event>([this](const uvw::end_event&, uvw::tcp_handle&) {
+        _tcpClient->close();
+        // Note: occassionally, we receive an EOF. Then we want to reconnect.
+        //_tcpClient->init();
+        //_tcpClient->connect(_ip, _port);
     });
 }
 
@@ -94,6 +99,10 @@ void ModbusClient::connect(const std::string& ip, uint16_t port) {
     _tcpClient->connect(_ip, _port);
 }
 
+bool ModbusClient::isConnected() const {
+    return _tcpClient->active();
+}
+
 void ModbusClient::readHoldingRegisters(uint8_t unitId, uint16_t address, uint16_t length, uint16_t userData) {
     _request.unitId = unitId;
     _request.memoryAddress = address;
@@ -101,7 +110,13 @@ void ModbusClient::readHoldingRegisters(uint8_t unitId, uint16_t address, uint16
     const auto& buffer = _request.toBuffer();
     _transactionsUserData[_request.transactionId] = userData;
     _tcpClient->write((char*)buffer.data(), buffer.size());
-    _tcpClient->read();
+    //_tcpClient->read();
+
+    //_timer = uvw::loop::get_default()->resource<uvw::timer_handle>();
+    //_timer->on<uvw::timer_event>([this](const uvw::timer_event&, uvw::timer_handle& timer) {
+    //    publish(uvw::error_event{(int)UV_ETIMEDOUT});
+    //    timer.close();
+    //});
 }
 
 } // namespace modbus

@@ -20,7 +20,6 @@ public:
     ~HttpSession();
 
 private:
-    std::shared_ptr<uvw::get_addr_info_req> _resolver = uvw::loop::get_default()->resource<uvw::get_addr_info_req>();
     std::shared_ptr<uvw::tcp_handle> _tcp = uvw::loop::get_default()->resource<uvw::tcp_handle>();
 
     HttpClient* _client;

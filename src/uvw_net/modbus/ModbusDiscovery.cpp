@@ -11,7 +11,11 @@ ModbusDiscovery::ModbusDiscovery() {
 }
 
 void ModbusDiscovery::discover() {
-    _candidates.clear();
+    // Some modbus devices (e.g. Elgris SmartMeter) will disconnect if we try to
+    // connect again. So, we better ignore already connected devices.
+    std::erase_if(_candidates, [](const auto& item) {
+        return (!item.second->isConnected());
+    });
 
     // Find subnet to scan
     std::string subnet;
@@ -31,18 +35,19 @@ void ModbusDiscovery::discover() {
     // Scan subnets
     for (uint8_t i = 1; i < 255; ++i) {
         const std::string host = subnet + std::to_string(i);
+        if (_candidates.contains(host)) continue;
 
         auto candidate = ModbusClient::create();
-        candidate->on<uvw::connect_event>([this](const uvw::connect_event&, ModbusClient& thing) {
-            thing.reset();
-            publish(thing.shared_from_this());
+        candidate->on<uvw::connect_event>([this](const uvw::connect_event&, ModbusClient& client) {
+            client.reset();
+            publish(client.shared_from_this());
         });
-        candidate->on<uvw::error_event>([this](const uvw::error_event&, ModbusClient& thing){
-            thing.reset();
+        candidate->on<uvw::error_event>([this](const uvw::error_event&, ModbusClient& client) {
+            client.reset();
         });
 
         candidate->connect(host);
-        _candidates.push_back(std::move(candidate));
+        _candidates[host] = std::move(candidate);
     }
 }
 

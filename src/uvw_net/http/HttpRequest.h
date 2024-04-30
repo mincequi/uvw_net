@@ -18,7 +18,7 @@ public:
     std::string body;
     std::string method = "GET";
     std::string host;
-    int port = 80;
+    //int port = 80;
     bool messageComplete = false;
 
 private:

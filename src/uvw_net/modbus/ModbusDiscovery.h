@@ -12,7 +12,7 @@ public:
     void discover();
 
 private:
-    std::list<ModbusClientPtr> _candidates;
+    std::map<std::string, ModbusClientPtr> _candidates;
 };
 
 } // namespace modbus

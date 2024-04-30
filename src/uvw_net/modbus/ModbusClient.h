@@ -27,6 +27,7 @@ public:
     uint16_t port() const;
 
     void connect(const std::string& ip, uint16_t port = 502);
+    bool isConnected() const;
 
     void readHoldingRegisters(uint8_t uintId, uint16_t address, uint16_t length, uint16_t userData = 0);
 
@@ -39,6 +40,8 @@ private:
     ModbusRequest _request;
     std::map<uint16_t, uint16_t> _transactionsUserData;
     std::vector<uint8_t> _readBuffer;
+
+    //std::shared_ptr<uvw::timer_handle> _timer;
 };
 
 using ModbusClientPtr = std::shared_ptr<ModbusClient>;

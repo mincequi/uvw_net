@@ -1,5 +1,9 @@
 #include "HttpSession.h"
 
+#include <iostream>
+
+#include <uvw_net/common/Util.h>
+
 #include "HttpClient.h"
 #include "HttpResponse.h"
 
@@ -8,13 +12,6 @@ namespace http {
 
 HttpSession::HttpSession(HttpClient* client) :
     _client(client) {
-    _resolver->on<uvw::error_event>([this](const uvw::error_event& error, const uvw::get_addr_info_req&) {
-        _client->publish(error);
-    });
-    _resolver->on<uvw::addr_info_event>([this](const uvw::addr_info_event& addrInfoEvent, const uvw::get_addr_info_req&) {
-        sockaddr addr = *(addrInfoEvent.data)->ai_addr;
-        _tcp->connect(addr);
-    });
 
     _tcp->on<uvw::error_event>([this](const uvw::error_event& error, uvw::tcp_handle&) {
         _client->publish(error);
@@ -34,11 +31,12 @@ HttpSession::HttpSession(HttpClient* client) :
             _client->_isRequestPending = false;
         }
     });
+    _tcp->on<uvw::close_event>([this](const uvw::close_event&, uvw::tcp_handle&) {
+        std::cerr << "HttpSession> close" << std::endl;
+    });
 }
 
 HttpSession::~HttpSession() {
-    _resolver->reset();
-    _resolver->cancel();
     _tcp->reset();
     _tcp->close();
 }

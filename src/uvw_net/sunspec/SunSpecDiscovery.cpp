@@ -37,9 +37,7 @@ void SunSpecDiscovery::discover(modbus::ModbusClientPtr thing) {
             thing.probeNextUnitId();
         }
     });
-    //candidate->on<SunSpecUnitId>([this](const auto& id, const SunSpecThing&) {
-    //    publish(id);
-    //});
+
     candidate->probeNextUnitId();
     _candidates.push_back(std::move(candidate));
 }

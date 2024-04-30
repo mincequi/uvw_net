@@ -19,7 +19,7 @@ using magic_enum::iostream_operators::operator<<;
 using namespace modbus;
 
 SunSpecClient::SunSpecClient(modbus::ModbusClientPtr modbusClient)
-    : _modbusClient(modbusClient->shared_from_this()) {
+    : _modbusClient(modbusClient) {
     _modbusClient->on<uvw::close_event>([this](const auto& ev, const auto&) {
         publish(ev);
     });
@@ -49,7 +49,9 @@ SunSpecClient::SunSpecClient(modbus::ModbusClientPtr modbusClient)
 
 SunSpecClient::~SunSpecClient() {
     //std::cout << "sunspecThing destroyed: " << host() << std::endl;
+    // Disconnects all listeners
     _modbusClient->reset();
+    //_modbusClient->close();
 }
 
 const std::string& SunSpecClient::host() const {

@@ -24,9 +24,7 @@ struct SunSpecUnitId {
  * If we want to check for further unitIds, this has to be part of higher level
  * classes/implementations (e.g. FroniusDiscovery).
  */
-// TODO: why is this enabling shared from this?
-class SunSpecClient final: public std::enable_shared_from_this<SunSpecClient>,
-        public uvw::emitter<SunSpecClient,
+class SunSpecClient final: public uvw::emitter<SunSpecClient,
         uvw::close_event,   // this device is closed (e.g. no sunspec header found).
         uvw::connect_event, // this device successfully initiated a connection
         modbus::ModbusException,    // for discovery (e.g. invalid id)
