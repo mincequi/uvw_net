@@ -27,6 +27,7 @@ public:
     uint16_t port() const;
 
     void connect(const std::string& ip, uint16_t port = 502);
+    void disconnect();
     bool isConnected() const;
 
     void readHoldingRegisters(uint8_t uintId, uint16_t address, uint16_t length, uint16_t userData = 0);

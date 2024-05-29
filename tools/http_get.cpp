@@ -8,7 +8,7 @@
 using namespace uvw_net::http;
 
 int main() {
-    HttpClient client;
+    HttpClient client("go-echarger_876432");
     client.on<HttpResponse>([](const HttpResponse& response, const HttpClient&) {
         std::cout << response.body << std::endl;
     });

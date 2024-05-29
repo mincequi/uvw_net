@@ -42,6 +42,7 @@ public:
     ~SunSpecClient();
 
     void probeNextUnitId();
+    void disconnect();
 
     const std::string& host() const;
     uint8_t unitId() const;

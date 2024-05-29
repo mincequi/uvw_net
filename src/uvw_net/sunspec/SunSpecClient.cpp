@@ -192,6 +192,10 @@ void SunSpecClient::probeNextUnitId() {
     readHeader(id);
 }
 
+void SunSpecClient::disconnect() {
+    _modbusClient->disconnect();
+}
+
 void SunSpecClient::readHeader(uint8_t id) {
     // Read entry point of sunspec.
     // First 2 registers form the well-known value 'SunS'(0x53756E53).

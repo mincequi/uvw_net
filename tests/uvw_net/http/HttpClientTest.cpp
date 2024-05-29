@@ -8,7 +8,7 @@
 using namespace uvw_net::http;
 
 SCENARIO("HttpClient", "[http][HttpClient]") {
-    HttpClient client;
+    HttpClient client("localhost");
     REQUIRE(client._isRequestPending == false);
     REQUIRE(client._currentSession == nullptr);
     int errorCode = 0;

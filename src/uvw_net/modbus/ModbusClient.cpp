@@ -79,10 +79,7 @@ ModbusClient::ModbusClient() {
 }
 
 ModbusClient::~ModbusClient() {
-    // Disconnects all listeners
-    _tcpClient->reset();
-    // Close the handle and release resources
-    _tcpClient->close();
+    disconnect();
 }
 
 const std::string& ModbusClient::ip() const {
@@ -97,6 +94,13 @@ void ModbusClient::connect(const std::string& ip, uint16_t port) {
     _ip = ip;
     _port = port;
     _tcpClient->connect(_ip, _port);
+}
+
+void ModbusClient::disconnect() {
+    // Disconnects all listeners
+    _tcpClient->reset();
+    // Close the handle and release resources
+    _tcpClient->close();
 }
 
 bool ModbusClient::isConnected() const {
