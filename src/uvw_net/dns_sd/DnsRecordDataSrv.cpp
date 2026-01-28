@@ -9,14 +9,14 @@
 namespace uvw_net {
 namespace dns_sd {
 
-std::optional<DnsRecordDataSrv> DnsRecordDataSrv::fromBuffer(const uint8_t* head,/*const DnsLabels& labels,*/ const uint8_t* data, size_t size) {
+std::optional<DnsResourceRecordDataSrv> DnsResourceRecordDataSrv::fromBuffer(const uint8_t* head,/*const DnsLabels& labels,*/ const uint8_t* data, size_t size) {
     if (size < 8) return {};
 
     std::vector<uint8_t> vec;
     vec.resize(size);
     std::memcpy(vec.data(), data, size);
 
-    DnsRecordDataSrv ret;
+    DnsResourceRecordDataSrv ret;
     ret.priority = ntohs(*(uint16_t*)data);
     ret.weight = ntohs(*(uint16_t*)(data+2));
     ret.port = ntohs(*(uint16_t*)(data+4));

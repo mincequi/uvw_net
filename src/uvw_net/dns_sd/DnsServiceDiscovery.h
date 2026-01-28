@@ -3,15 +3,16 @@
 #include <uvw/loop.h>
 #include <uvw/udp.h>
 #include <uvw_net/dns_sd/DnsRecordDataSrv.h>
+#include <uvw_net/dns_sd/MdnsResponse.h>
 
 namespace uvw_net {
 namespace dns_sd {
 
-class DnsServiceDiscovery final: public uvw::emitter<DnsServiceDiscovery, DnsRecordDataSrv> {
+class DnsServiceDiscovery final: public uvw::emitter<DnsServiceDiscovery, MdnsResponse> {
 public:
-    DnsServiceDiscovery();
+    DnsServiceDiscovery(const std::string& name);
 
-    void discover(const std::string& name);
+    void discover();
 
 private:
     std::shared_ptr<uvw::udp_handle> _udp = uvw::loop::get_default()->resource<uvw::udp_handle>();

@@ -28,9 +28,9 @@ std::vector<std::string> split(const std::string& str, char delimiter) {
 
 class DnsRecordParser {
 public:
-    DnsRecordParser(const uint8_t* begin, const uint8_t* end) :
-        _begin(begin),
-        _end(end) {
+    DnsRecordParser(std::string_view buffer) {
+        _begin = (uint8_t*)buffer.data();
+        _end = _begin + buffer.size();
         assert(_begin < _end);
     }
 
@@ -48,16 +48,16 @@ public:
 
 		DnsQuestion r;
 		r.name = std::move(name);
-		r.type = read<DnsRecordType>((uint16_t*)(_begin + offset + rsize));
+        r.type = read<DnsResourceRecordType>((uint16_t*)(_begin + offset + rsize));
 		rsize += sizeof(uint16_t);
-		r.cls = read<DnsRecordClass>((uint16_t *)(_begin + offset + rsize));
+        r.cls = read<DnsResourceRecordClass>((uint16_t *)(_begin + offset + rsize));
 		rsize += sizeof(uint16_t);
 
 		return { rsize, std::move(r) };
 	}
 
-	std::tuple<size_t, DnsAnswer> parseAnswer(size_t offset) {
-		if (_begin + offset + DnsAnswer::minSize > _end) {
+    std::tuple<size_t, DnsResourceRecord> parseAnswer(size_t offset) {
+        if (_begin + offset + DnsResourceRecord::minSize > _end) {
 			return { 0, {} };
 		}
 		auto [rsize, name] = DnsParser::parseName(_begin, _begin + offset, _end);
@@ -68,11 +68,11 @@ public:
 			return { 0, {} };
 		}
 
-		DnsAnswer r;
+        DnsResourceRecord r;
 		r.name = std::move(name);
-		r.type = read<DnsRecordType>((uint16_t*)(_begin + offset + rsize));
+        DnsResourceRecordType type = read<DnsResourceRecordType>((uint16_t*)(_begin + offset + rsize));
 		rsize += sizeof(uint16_t);
-		r.cls = read<DnsRecordClass>((uint16_t *)(_begin + offset + rsize));
+        DnsResourceRecordClass cls = read<DnsResourceRecordClass>((uint16_t *)(_begin + offset + rsize));
 		rsize += sizeof(uint16_t);
 		r.ttl = ntohl(*(uint32_t *)(_begin + offset + rsize));
 		rsize += sizeof(uint32_t);
@@ -82,7 +82,7 @@ public:
 			return { 0, {} };
 		}
 		// resolve data
-		auto data = readDnsRecordData(r.type, _begin + offset + rsize, dataSize);
+        auto data = readDnsRecordData(type, _begin + offset + rsize, dataSize);
 		if (!data) return { 0, {} };
 		r.data = std::move(*data);
 		rsize += dataSize;
@@ -96,16 +96,16 @@ private:
         return magic_enum::enum_cast<T>(ntohs(*p)).value_or(T::Invalid);
     }
 
-    std::optional<DnsRecordData> readDnsRecordData(DnsRecordType type, const uint8_t* dataPtr, uint16_t dataSize) {
+    std::optional<DnsResourceRecordData> readDnsRecordData(DnsResourceRecordType type, const uint8_t* dataPtr, uint16_t dataSize) {
         switch (type) {
-        case DnsRecordType::A: {
+        case DnsResourceRecordType::A: {
             //
             // +0x00 IPv4 (4 bytes)
             //
-            if (dataSize != sizeof(AData)) {
+            if (dataSize != sizeof(DnsResourceRecordDataA)) {
                 break;
             }
-            return *(AData*)dataPtr;
+            return *(DnsResourceRecordDataA*)dataPtr;
         } break;
             /* TODO
             case DnsRecordType::AAAA: {
@@ -119,7 +119,7 @@ private:
                 memcpy(&data[0], dataPtr, data.size());
                 return { true, std::move(data) };
             } break;*/
-        case DnsRecordType::SOA: {
+        case DnsResourceRecordType::SOA: {
             //
             // +0x00 Primary name server (VARIANT, 2 bytes at least)
             //	...
@@ -159,7 +159,7 @@ private:
             r.defaultTtl = ntohl(*(uint16_t *)(dataPtr + offset + sizeof(uint32_t) * 4));
             return std::move(r);
         } break;
-        case DnsRecordType::MX: {
+        case DnsResourceRecordType::MX: {
             //
             // +0x00 Preference
             // +0x02 Exchange Server Name
@@ -176,9 +176,9 @@ private:
             data.exchange = std::move(name);
             return std::move(data);
         } break;
-        case DnsRecordType::NS:
-        case DnsRecordType::CNAME:
-        case DnsRecordType::PTR: {
+        case DnsResourceRecordType::NS:
+        case DnsResourceRecordType::CNAME:
+        case DnsResourceRecordType::PTR: {
             //
             // +0x00 Host name
             //
@@ -188,7 +188,7 @@ private:
             }
             return std::move(name);
         } break;
-        case DnsRecordType::TXT: {
+        case DnsResourceRecordType::TXT: {
             //
             // +0x00 Text length
             // +0x01 Text (VARIANT length)
@@ -197,16 +197,16 @@ private:
             if (dataSize <= 1 /*|| dataLength != *(uint8_t *)dataPtr + 1*/) {
                 return {};
             }
-            TXTData data;
+            DnsResourceRecordDataTxt data;
             data.size = *(uint8_t *)dataPtr;
             data.txt = std::string((char *)dataPtr + 1, dataSize - 1);
             return std::move(data);
         } break;
-        case DnsRecordType::SRV:
-            return DnsRecordDataSrv::fromBuffer(_begin, dataPtr, dataSize);
+        case DnsResourceRecordType::SRV:
+            return DnsResourceRecordDataSrv::fromBuffer(_begin, dataPtr, dataSize);
         default: {
             // Unsupported record type (for now)
-            OctectStreamData payload;
+            DnsResourceRecordDataOctectStream payload;
             if (dataSize) {
                 payload.resize(dataSize);
                 if (payload.empty()) {
@@ -221,11 +221,11 @@ private:
     }
 
 
-	const uint8_t *_begin = nullptr;
-    const uint8_t *_end = nullptr;
+    uint8_t* _begin = nullptr;
+    uint8_t* _end = nullptr;
 };
 
-std::optional<DnsMessage> DnsMessage::fromBuffer(const uint8_t* buf, size_t bufSize) {
+std::optional<DnsMessage> DnsMessage::fromBuffer(std::string_view buffer) {
     // +------------+
     // | Header     |
     // +------------+
@@ -238,23 +238,39 @@ std::optional<DnsMessage> DnsMessage::fromBuffer(const uint8_t* buf, size_t bufS
     // | Additional |
     // +------------+
 
-    if (bufSize < 12) {
+    if (buffer.size() < 12) {
         return {};
     }
 
     DnsMessage message;
-    const auto header = (const DnsHeader*)buf;
-    memcpy(&message.header, header, sizeof(DnsHeader));
-    message.header.transactionId = ntohs(header->transactionId);
 
-    size_t offset = sizeof(DnsHeader);
-    auto questionCount = ntohs(*(uint16_t*)(buf + offset));
-    auto anwserCount = ntohs(*(uint16_t*)(buf + offset + sizeof(uint16_t)));
-    auto authoriyCount = ntohs(*(uint16_t*)(buf + offset + sizeof(uint16_t) * 2));
-    auto additonalCount = ntohs(*(uint16_t*)(buf + offset + sizeof(uint16_t) * 3));
-    offset += sizeof(uint16_t) * 4;
+    uint16_t transactionId;
+    std::memcpy(&transactionId, buffer.data(), sizeof(uint16_t));
+    message.transactionId = ntohs(transactionId);
 
-    DnsRecordParser parser(buf, buf + bufSize);
+    // Flags: bytes 2-3
+    uint16_t flags;
+    std::memcpy(&flags, buffer.data() + 2, sizeof(uint16_t));
+    flags = ntohs(flags);
+
+    // Extract bits
+    message.isResponse           = (flags >> 15) & 0x1;       // QR
+    message.opcode               = static_cast<DnsOpcode>((flags >> 11) & 0xF); // OPCODE
+    message.isAuthoritative      = (flags >> 10) & 0x1;       // AA
+    message.isTruncated          = (flags >> 9)  & 0x1;       // TC
+    message.isRecursionDesired   = (flags >> 8)  & 0x1;       // RD
+    message.isRecursionAvailable = (flags >> 7)  & 0x1;       // RA
+    message.isAuthenticatedData  = (flags >> 5)  & 0x1;       // AD
+    message.isCheckingDisabled   = (flags >> 4)  & 0x1;       // CD
+    message.rcode                = static_cast<DnsRcode>(flags & 0xF); // RCODE
+
+    auto questionCount   = ntohs(*reinterpret_cast<const uint16_t*>(buffer.data() + 4));
+    auto answerCount     = ntohs(*reinterpret_cast<const uint16_t*>(buffer.data() + 6));
+    auto authorityCount  = ntohs(*reinterpret_cast<const uint16_t*>(buffer.data() + 8));
+    auto additionalCount = ntohs(*reinterpret_cast<const uint16_t*>(buffer.data() + 10));
+
+    size_t offset = 12;
+    DnsRecordParser parser(buffer);
     for (auto i = 0; i < questionCount; ++i) {
         auto [qsize, question] = parser.parseQuestion(offset);
                 if (!qsize) {
@@ -263,8 +279,9 @@ std::optional<DnsMessage> DnsMessage::fromBuffer(const uint8_t* buf, size_t bufS
         message.questions.emplace_back(std::move(question));
         offset += qsize;
     }
-    if (header->isResponse) {
-        for (auto i = 0; i < anwserCount; ++i) {
+
+    if (message.isResponse) {
+        for (auto i = 0; i < answerCount; ++i) {
             auto [rsize, record] = parser.parseAnswer(offset);
                     if (!rsize) {
                 return {};
@@ -272,7 +289,7 @@ std::optional<DnsMessage> DnsMessage::fromBuffer(const uint8_t* buf, size_t bufS
             offset += rsize;
             message.answers.emplace_back(std::move(record));
         }
-        for (auto i = 0; i < authoriyCount; ++i) {
+        for (auto i = 0; i < authorityCount; ++i) {
             auto [rsize, record] = parser.parseAnswer(offset);
                     if (!rsize) {
                 return {};
@@ -280,7 +297,7 @@ std::optional<DnsMessage> DnsMessage::fromBuffer(const uint8_t* buf, size_t bufS
             offset += rsize;
             message.authorityAnswers.emplace_back(std::move(record));
         }
-        for (auto i = 0; i < additonalCount; ++i) {
+        for (auto i = 0; i < additionalCount; ++i) {
             auto [rsize, record] = parser.parseAnswer(offset);
                     if (!rsize) {
                 return {};
@@ -295,16 +312,35 @@ std::optional<DnsMessage> DnsMessage::fromBuffer(const uint8_t* buf, size_t bufS
 
 std::vector<uint8_t> DnsMessage::toBuffer() const {
     std::vector<uint8_t> buffer;
-    buffer.resize(sizeof(DnsHeader) + 4 * 2); // make room for header and counts
-    std::memcpy(buffer.data(), &header, sizeof(DnsHeader));
-    const auto questionCount = htons(questions.size());
-    const auto anwserCount = htons(answers.size());
-    const auto authoriyCount = htons(authorityAnswers.size());
-    const auto additonalCount = htons(additionalAnswers.size());
+    buffer.resize(12); // make room for header and counts
+
+    // 1 Transaction ID
+    uint16_t tid = htons(transactionId);
+    std::memcpy(buffer.data(), &tid, 2);
+
+    // 2 Flags
+    uint16_t flags = 0;
+    flags |= (isResponse           ? 1 : 0) << 15;  // QR
+    flags |= (static_cast<uint16_t>(opcode) & 0xF) << 11; // OPCODE
+    flags |= (isAuthoritative      ? 1 : 0) << 10;  // AA
+    flags |= (isTruncated          ? 1 : 0) << 9;   // TC
+    flags |= (isRecursionDesired   ? 1 : 0) << 8;   // RD
+    flags |= (isRecursionAvailable ? 1 : 0) << 7;   // RA
+    flags |= (isAuthenticatedData  ? 1 : 0) << 5;   // AD
+    flags |= (isCheckingDisabled   ? 1 : 0) << 4;   // CD
+    flags |= (static_cast<uint16_t>(rcode) & 0xF);  // RCODE
+    uint16_t netFlags = htons(flags);
+    std::memcpy(buffer.data() + 2, &netFlags, 2);
+
+    // 3 Section counts
+    uint16_t questionCount   = htons(static_cast<uint16_t>(questions.size()));
+    uint16_t answerCount     = htons(static_cast<uint16_t>(answers.size()));
+    uint16_t authorityCount  = htons(static_cast<uint16_t>(authorityAnswers.size()));
+    uint16_t additionalCount = htons(static_cast<uint16_t>(additionalAnswers.size()));
     std::memcpy(buffer.data() + 4, &questionCount, 2);
-    std::memcpy(buffer.data() + 6, &anwserCount, 2);
-    std::memcpy(buffer.data() + 8, &authoriyCount, 2);
-    std::memcpy(buffer.data() + 10, &additonalCount, 2);
+    std::memcpy(buffer.data() + 6, &answerCount, 2);
+    std::memcpy(buffer.data() + 8, &authorityCount, 2);
+    std::memcpy(buffer.data() + 10, &additionalCount, 2);
 
     uint16_t offset = 12;
     for (const auto& q : questions) {

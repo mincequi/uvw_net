@@ -3,6 +3,10 @@ add_library(uvw_net_dns_sd STATIC
   DnsParser.cpp
   DnsRecordDataSrv.cpp
   DnsServiceDiscovery.cpp
+  DnsOpcode.h
+  DnsRcode.h
+  DnsResourceRecord.h
+  MdnsResponse.h
 )
 add_library(uvw_net::dns_sd ALIAS uvw_net_dns_sd)
 

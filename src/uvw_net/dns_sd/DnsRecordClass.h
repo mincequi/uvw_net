@@ -5,7 +5,7 @@
 namespace uvw_net {
 namespace dns_sd {
 
-enum DnsRecordClass : uint16_t {
+enum DnsResourceRecordClass : uint16_t {
     Invalid = 0,
 
 	Internet = 1,

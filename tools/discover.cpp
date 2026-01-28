@@ -14,11 +14,10 @@ using namespace uvw_net::sunspec;
 using magic_enum::iostream_operators::operator<<;
 
 int main() {
-    DnsServiceDiscovery dnsDiscovery;
-    dnsDiscovery.discover("_http._tcp.local");
-    dnsDiscovery.on<DnsRecordDataSrv>([](const DnsRecordDataSrv& data, const DnsServiceDiscovery&) {
-        const auto host = data.target.substr(0, data.target.find("."));
-        std::cout << "http service found> host: " << host << ", port: " << data.port << std::endl;
+    DnsServiceDiscovery dnsDiscovery("_http._tcp.local.");
+    dnsDiscovery.discover();
+    dnsDiscovery.on<MdnsResponse>([](const MdnsResponse& response, const DnsServiceDiscovery&) {
+        std::cout << "http service found> ptrData: " << response.ptrData << std::endl;
     });
 
     SunSpecDiscovery sunspecDiscovery;

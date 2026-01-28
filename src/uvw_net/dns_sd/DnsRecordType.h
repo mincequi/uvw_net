@@ -3,7 +3,7 @@
 namespace uvw_net {
 namespace dns_sd {
 
-enum class DnsRecordType : uint16_t {
+enum class DnsResourceRecordType : uint16_t {
     Invalid = 0,
 
     A = 1,

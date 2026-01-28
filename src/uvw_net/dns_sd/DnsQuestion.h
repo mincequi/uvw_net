@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include <uvw_net/dns_sd/DnsRecordClass.h>
 #include <uvw_net/dns_sd/DnsRecordType.h>
 
@@ -16,8 +18,8 @@ namespace dns_sd {
 
 struct DnsQuestion {
 	std::string name;
-	DnsRecordType type = DnsRecordType::Invalid;
-	DnsRecordClass cls = DnsRecordClass::Internet;
+    DnsResourceRecordType type = DnsResourceRecordType::PTR;
+	DnsResourceRecordClass cls = DnsResourceRecordClass::Internet;
 
     const static uint16_t minSize = 6;
 };

@@ -14,3 +14,11 @@ target_link_libraries(http_get
   uvw_net::common
   uvw_net::http
 )
+
+add_executable(mdns-discover
+  mdns-discover.cpp
+)
+target_link_libraries(mdns-discover
+  uvw_net::common
+  uvw_net::dns_sd
+)

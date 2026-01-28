@@ -11,20 +11,20 @@
 namespace uvw_net {
 namespace dns_sd {
 
-using OctectStreamData = std::vector<std::byte>;
+using DnsResourceRecordDataOctectStream = std::vector<std::byte>;
 
-using AData = uint32_t;
+using DnsResourceRecordDataA = uint32_t;
 
-using AAAAData = std::array<std::byte, 16>;
+using DnsResourceRecordDataAaaa = std::array<std::byte, 16>;
 
-using PTRData = std::string;
+using DnsResourceRecordDataPtr = std::string;
 
 struct MXData {
 	uint16_t preference = 0;
 	std::string exchange;
 };
 
-struct TXTData {
+struct DnsResourceRecordDataTxt {
 	uint8_t size = 0;
 	std::string txt;
 };
@@ -39,15 +39,15 @@ struct SOAData {
 	uint32_t defaultTtl = 0;
 };
 
-using DnsRecordData = std::variant<
-		OctectStreamData,
-		AData,
+using DnsResourceRecordData = std::variant<
+        DnsResourceRecordDataOctectStream,
+        DnsResourceRecordDataA,
 		//AAAAData,
-		PTRData,
+        DnsResourceRecordDataPtr,
 		MXData,
-		TXTData,
+        DnsResourceRecordDataTxt,
 		SOAData,
-        DnsRecordDataSrv>;
+        DnsResourceRecordDataSrv>;
 
 } // namespace dns_sd
 } // namespace uvw_net

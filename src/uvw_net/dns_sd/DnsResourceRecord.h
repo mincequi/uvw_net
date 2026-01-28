@@ -1,7 +1,7 @@
 #pragma once
 
 #include <uvw_net/dns_sd/DnsRecordClass.h>
-#include <uvw_net/dns_sd/DnsRecordData.h>
+#include <uvw_net/dns_sd/DnsResourceRecordData.h>
 #include <uvw_net/dns_sd/DnsRecordType.h>
 
 namespace uvw_net {
@@ -21,12 +21,14 @@ namespace dns_sd {
 // /   RDATA  /
 // +--+--+--+--
 
-struct DnsAnswer {
+struct DnsResourceRecord {
 	std::string name;
-	DnsRecordType type = DnsRecordType::Invalid;
-	DnsRecordClass cls = DnsRecordClass::Invalid;
+    // note: type is inheritly defined by data variant, therefore not needed here
+    //DnsRecordType type = DnsRecordType::Invalid;
+    // note: class is always IN for DNS-SD, therefore not needed here
+    //DnsResourceRecordClass cls = DnsResourceRecordClass::Invalid;
 	uint32_t ttl = 0;
-	DnsRecordData data;
+    DnsResourceRecordData data;
 
     const static uint16_t minSize = 6;
 };
