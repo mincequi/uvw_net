@@ -10,15 +10,21 @@ using namespace uvw_net::dns_sd;
 using magic_enum::iostream_operators::operator<<;
 
 int main() {
-    DnsServiceDiscovery dnsDiscovery("_shelly._tcp.local.");
-    dnsDiscovery.on<MdnsResponse>([](const MdnsResponse& response, const DnsServiceDiscovery&) {
+    DnsServiceDiscovery shellyDiscovery("_shelly._tcp.local.");
+    shellyDiscovery.on<MdnsResponse>([](const MdnsResponse& response, const DnsServiceDiscovery&) {
         std::cout << "shelly found> ptrData: " << response.ptrData << std::endl;
+    });
+
+    DnsServiceDiscovery httpDiscovery("_http._tcp.local.");
+    httpDiscovery.on<MdnsResponse>([](const MdnsResponse& response, const DnsServiceDiscovery&) {
+        std::cout << "http found> ptrData: " << response.ptrData << std::endl;
     });
 
     // Start a timeout
     auto timer = uvw::loop::get_default()->resource<uvw::timer_handle>();
     timer->on<uvw::timer_event>([&](const auto&, auto&) {
-        dnsDiscovery.discover();
+        shellyDiscovery.discover();
+        httpDiscovery.discover();
     });
     timer->start(uvw::timer_handle::time{1000}, uvw::timer_handle::time{5000});
 

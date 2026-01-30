@@ -1,8 +1,8 @@
 #pragma once
 
-#include <uvw_net/dns_sd/DnsRecordClass.h>
+#include <uvw_net/dns_sd/DnsResourceRecordClass.h>
 #include <uvw_net/dns_sd/DnsResourceRecordData.h>
-#include <uvw_net/dns_sd/DnsRecordType.h>
+#include <uvw_net/dns_sd/DnsResourceRecordType.h>
 
 namespace uvw_net {
 namespace dns_sd {

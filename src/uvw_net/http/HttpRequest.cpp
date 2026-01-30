@@ -24,8 +24,8 @@ std::pair<std::unique_ptr<char[]>, size_t> HttpRequest::toBuffer() {
     }
 
     ss << "Host: " << host << "\r\n";
-    ss << "User-Agent: uvw-net"
-       << "\r\n";
+    ss << "Connection: close\r\n";
+    ss << "User-Agent: uvw-net" << "\r\n";
 
     for (auto&& it : headers) {
         ss << it.first << ": " << it.second << "\r\n";

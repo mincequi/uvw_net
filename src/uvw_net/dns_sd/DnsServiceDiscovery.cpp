@@ -49,6 +49,7 @@ DnsServiceDiscovery::DnsServiceDiscovery(const std::string& name)
         }
 
         publish(MdnsResponse{
+            .serviceName = _name,
             .ptrData = *ptrData,
             .aData = aData,
             .srvData = srvData,

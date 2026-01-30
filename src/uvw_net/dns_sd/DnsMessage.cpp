@@ -6,7 +6,7 @@
 #include <magic_enum.hpp>
 
 #include "DnsParser.h"
-#include "DnsRecordClass.h"
+#include "DnsResourceRecordClass.h"
 #include "DnsRecordDataSrv.h"
 
 namespace uvw_net {
@@ -83,7 +83,7 @@ public:
 		}
 		// resolve data
         auto data = readDnsRecordData(type, _begin + offset + rsize, dataSize);
-		if (!data) return { 0, {} };
+        if (!data) return { 0, {} };
 		r.data = std::move(*data);
 		rsize += dataSize;
 
@@ -119,63 +119,6 @@ private:
                 memcpy(&data[0], dataPtr, data.size());
                 return { true, std::move(data) };
             } break;*/
-        case DnsResourceRecordType::SOA: {
-            //
-            // +0x00 Primary name server (VARIANT, 2 bytes at least)
-            //	...
-            // +0x02 Responsible authority's mailbox (VARIANT, 2 bytes at least)
-            //  ...
-            // +0x04 Serial number
-            // +0x08 Refresh interval
-            // +0x0C Retry interval
-            // +0x10 Expire limit
-            // +0x14 Minimum TTL
-            //
-            if (dataSize < 0x18) {
-                return {};
-            }
-            size_t offset = 0;
-
-            auto [primaySvrLen, primarySvr] = DnsParser::parseName(_begin, dataPtr + offset, _end);
-                    if (!primaySvrLen || dataSize < 0x16 + primaySvrLen) {
-                return {};
-            }
-            offset += primaySvrLen;
-
-            auto [mailboxLen, mailbox] = DnsParser::parseName(_begin, dataPtr + offset, _end);
-                    if (!mailboxLen || dataSize != 0x14 + primaySvrLen + mailboxLen) {
-                return {};
-            }
-            offset += mailboxLen;
-
-            // read other fields
-            SOAData r;
-            r.primaryServer = std::move(primarySvr);
-            r.administrator = std::move(mailbox);
-            r.serialNo = ntohl(*(uint16_t *)(dataPtr + offset));
-            r.refresh = ntohl(*(uint16_t *)(dataPtr + offset + sizeof(uint32_t)));
-            r.retry = ntohl(*(uint16_t *)(dataPtr + offset + sizeof(uint32_t) * 2));
-            r.expire = ntohl(*(uint16_t *)(dataPtr + offset + sizeof(uint32_t) * 3));
-            r.defaultTtl = ntohl(*(uint16_t *)(dataPtr + offset + sizeof(uint32_t) * 4));
-            return std::move(r);
-        } break;
-        case DnsResourceRecordType::MX: {
-            //
-            // +0x00 Preference
-            // +0x02 Exchange Server Name
-            //
-            MXData data;
-            if (dataSize < sizeof(uint16_t) * 2) {
-                return {};
-            }
-            data.preference = ntohs(*(uint16_t *)dataPtr);
-            auto [nameSize, name] = DnsParser::parseName(_begin, dataPtr + sizeof(uint16_t), _end);
-                    if (nameSize + sizeof(uint16_t) != dataSize) {
-                return {};
-            }
-            data.exchange = std::move(name);
-            return std::move(data);
-        } break;
         case DnsResourceRecordType::NS:
         case DnsResourceRecordType::CNAME:
         case DnsResourceRecordType::PTR: {
